@@ -13,10 +13,7 @@ public enum SuccessStatus {
      * 200
      */
     SEND_HEALTH_CHECK_SUCCESS(HttpStatus.OK,"서버 상태 체크 성공"),
-
-    /**
-     * 201
-     */
+    GET_RECEIVING_HISTORY_SUCCESS(HttpStatus.OK,"입고 히스토리 조회 성공"),
 
     ;
 
