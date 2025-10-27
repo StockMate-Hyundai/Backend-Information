@@ -1,6 +1,8 @@
 package com.stockmate.information.common.config.kafka;
 
 import com.stockmate.information.api.order.dto.ReceivingOrderHistoryRequestEvent;
+import com.stockmate.information.api.order.dto.ReceivingOrderHistorySuccessEvent;
+import com.stockmate.information.api.order.dto.ReceivingOrderHistoryFailedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -43,7 +45,9 @@ public class KafkaConfig {
         typeMapper.setTypePrecedence(Jackson2JavaTypeMapper.TypePrecedence.TYPE_ID);
 
         Map<String, Class<?>> classIdMapping = new HashMap<>();
-        classIdMapping.put("receivingHistoryRequest", ReceivingOrderHistoryRequestEvent.class);
+        classIdMapping.put("receivingOrderHistoryRequest", ReceivingOrderHistoryRequestEvent.class);
+        classIdMapping.put("receivingOrderHistorySuccess", ReceivingOrderHistorySuccessEvent.class);
+        classIdMapping.put("receivingOrderHistoryFailed", ReceivingOrderHistoryFailedEvent.class);
         typeMapper.setIdClassMapping(classIdMapping);
         jsonSerializer.setTypeMapper(typeMapper);
 
@@ -67,7 +71,7 @@ public class KafkaConfig {
         props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class.getName());
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.stockmate.information.api.order.dto,com.stockmate.order.api.order.dto");
         props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
-        props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "com.stockmate.information.api.order.dto.ReivingHistoryRequestEvent");
+        props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "com.stockmate.information.api.order.dto.ReceivingOrderHistoryRequestEvent");
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
 
         log.info("Kafka Consumer Factory 설정 완료 - Bootstrap Servers: {}", bootstrapServers);
