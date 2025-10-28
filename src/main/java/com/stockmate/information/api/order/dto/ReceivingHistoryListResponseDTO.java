@@ -1,6 +1,5 @@
 package com.stockmate.information.api.order.dto;
 
-import com.stockmate.information.api.order.entity.ReceivingOrderHistory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,6 +17,6 @@ public class ReceivingHistoryListResponseDTO {
     private int currentPage;         // 현재 페이지 번호
     private int pageSize;            // 페이지 크기
     private boolean isLast;          // 마지막 페이지 여부
-    private List<ReceivingOrderHistory> content; // 히스토리 목록
+    private List<ReceivingHistoryDetailDTO> content; // 히스토리 목록 (부품 상세 포함)
 }
 
