@@ -1,5 +1,6 @@
 package com.stockmate.information.api.order.service;
 
+import com.stockmate.information.api.order.dto.ReceivingHistoryListResponseDTO;
 import com.stockmate.information.api.order.dto.ReceivingHistoryRequestDTO;
 import com.stockmate.information.api.order.dto.ReceivingHistoryResponseDTO;
 import com.stockmate.information.api.order.entity.ReceivingOrderHistory;
@@ -8,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -45,15 +44,103 @@ public class ReceivingOrderHistoryService {
                 .build();
     }
 
+    // 가맹점별 입출고 히스토리 조회 (페이지네이션)
     @Transactional(readOnly = true)
-    public List<ReceivingOrderHistory> getReceivingHistoryByMemberId(Long memberId) {
-        log.info("가맹점별 입출고 히스토리 조회 - 가맹점 ID: {}", memberId);
-        return receivingOrderHistoryRepository.findByMemberIdOrderByCreatedAtDesc(memberId);
+    public ReceivingHistoryListResponseDTO getReceivingHistoryByMemberId(Long memberId, int page, int size) {
+        log.info("가맹점별 입출고 히스토리 조회 - 가맹점 ID: {}, Page: {}, Size: {}", memberId, page, size);
+        
+        // 페이지 번호와 크기 검증
+        int validPage = page < 0 ? 0 : page;
+        int validSize = (size <= 0 || size > 100) ? 20 : size;
+        
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(validPage, validSize);
+        org.springframework.data.domain.Page<ReceivingOrderHistory> historyPage = receivingOrderHistoryRepository.findByMemberIdOrderByCreatedAtDesc(memberId, pageable);
+        
+        log.info("가맹점별 입출고 히스토리 조회 완료 - 가맹점 ID: {}, 총 데이터 수: {}, 현재 페이지 데이터 수: {}", 
+                memberId, historyPage.getTotalElements(), historyPage.getContent().size());
+        
+        return ReceivingHistoryListResponseDTO.builder()
+                .totalElements(historyPage.getTotalElements())
+                .totalPages(historyPage.getTotalPages())
+                .currentPage(historyPage.getNumber())
+                .pageSize(historyPage.getSize())
+                .isLast(historyPage.isLast())
+                .content(historyPage.getContent())
+                .build();
     }
 
+    // 관리자용 - 모든 입출고 히스토리 조회 (페이지네이션)
     @Transactional(readOnly = true)
-    public List<ReceivingOrderHistory> getReceivingHistoryByOrderNumber(String orderNumber) {
-        log.info("주문별 입출고 히스토리 조회 - Order Number: {}", orderNumber);
-        return receivingOrderHistoryRepository.findByOrderNumberOrderByCreatedAtDesc(orderNumber);
+    public ReceivingHistoryListResponseDTO getAllReceivingHistory(int page, int size) {
+        log.info("관리자용 전체 입출고 히스토리 조회 - Page: {}, Size: {}", page, size);
+        
+        // 페이지 번호와 크기 검증
+        int validPage = page < 0 ? 0 : page;
+        int validSize = (size <= 0 || size > 100) ? 20 : size;
+        
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(validPage, validSize);
+        org.springframework.data.domain.Page<ReceivingOrderHistory> historyPage = receivingOrderHistoryRepository.findAllOrderByCreatedAtDesc(pageable);
+        
+        log.info("관리자용 전체 입출고 히스토리 조회 완료 - 총 데이터 수: {}, 현재 페이지 데이터 수: {}", 
+                historyPage.getTotalElements(), historyPage.getContent().size());
+        
+        return ReceivingHistoryListResponseDTO.builder()
+                .totalElements(historyPage.getTotalElements())
+                .totalPages(historyPage.getTotalPages())
+                .currentPage(historyPage.getNumber())
+                .pageSize(historyPage.getSize())
+                .isLast(historyPage.isLast())
+                .content(historyPage.getContent())
+                .build();
+    }
+
+    // 관리자용 - 특정 가맹점 입출고 히스토리 조회 (페이지네이션)
+    @Transactional(readOnly = true)
+    public ReceivingHistoryListResponseDTO getReceivingHistoryByMemberIdForAdmin(Long memberId, int page, int size) {
+        log.info("관리자용 특정 가맹점 입출고 히스토리 조회 - 가맹점 ID: {}, Page: {}, Size: {}", memberId, page, size);
+        
+        // 페이지 번호와 크기 검증
+        int validPage = page < 0 ? 0 : page;
+        int validSize = (size <= 0 || size > 100) ? 20 : size;
+        
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(validPage, validSize);
+        org.springframework.data.domain.Page<ReceivingOrderHistory> historyPage = receivingOrderHistoryRepository.findByMemberIdOrderByCreatedAtDesc(memberId, pageable);
+        
+        log.info("관리자용 특정 가맹점 입출고 히스토리 조회 완료 - 가맹점 ID: {}, 총 데이터 수: {}, 현재 페이지 데이터 수: {}", 
+                memberId, historyPage.getTotalElements(), historyPage.getContent().size());
+        
+        return ReceivingHistoryListResponseDTO.builder()
+                .totalElements(historyPage.getTotalElements())
+                .totalPages(historyPage.getTotalPages())
+                .currentPage(historyPage.getNumber())
+                .pageSize(historyPage.getSize())
+                .isLast(historyPage.isLast())
+                .content(historyPage.getContent())
+                .build();
+    }
+
+    // 주문별 입출고 히스토리 조회 (페이지네이션)
+    @Transactional(readOnly = true)
+    public ReceivingHistoryListResponseDTO getReceivingHistoryByOrderNumber(String orderNumber, int page, int size) {
+        log.info("주문별 입출고 히스토리 조회 - Order Number: {}, Page: {}, Size: {}", orderNumber, page, size);
+        
+        // 페이지 번호와 크기 검증
+        int validPage = page < 0 ? 0 : page;
+        int validSize = (size <= 0 || size > 100) ? 20 : size;
+        
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(validPage, validSize);
+        org.springframework.data.domain.Page<ReceivingOrderHistory> historyPage = receivingOrderHistoryRepository.findByOrderNumberOrderByCreatedAtDesc(orderNumber, pageable);
+        
+        log.info("주문별 입출고 히스토리 조회 완료 - Order Number: {}, 총 데이터 수: {}, 현재 페이지 데이터 수: {}", 
+                orderNumber, historyPage.getTotalElements(), historyPage.getContent().size());
+        
+        return ReceivingHistoryListResponseDTO.builder()
+                .totalElements(historyPage.getTotalElements())
+                .totalPages(historyPage.getTotalPages())
+                .currentPage(historyPage.getNumber())
+                .pageSize(historyPage.getSize())
+                .isLast(historyPage.isLast())
+                .content(historyPage.getContent())
+                .build();
     }
 }
