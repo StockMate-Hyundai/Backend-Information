@@ -1,20 +1,20 @@
 package com.stockmate.information.api.order.controller;
 
+import com.stockmate.information.api.order.dto.ReceivingHistoryListResponseDTO;
 import com.stockmate.information.api.order.dto.ReceivingHistoryRequestDTO;
 import com.stockmate.information.api.order.dto.ReceivingHistoryResponseDTO;
-import com.stockmate.information.api.order.entity.ReceivingOrderHistory;
-import com.stockmate.information.api.order.service.ReceivingOrderHistoryService;
+import com.stockmate.information.common.config.security.Role;
 import com.stockmate.information.common.config.security.SecurityUser;
+import com.stockmate.information.common.exception.UnauthorizedException;
 import com.stockmate.information.common.response.ApiResponse;
 import com.stockmate.information.common.response.SuccessStatus;
+import com.stockmate.information.api.order.service.ReceivingOrderHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/information/order-history")
@@ -35,25 +35,89 @@ public class ReceivingOrderHistoryController {
         return ApiResponse.success(SuccessStatus.REGISTER_RECEIVING_HISTORY_SUCCESS, response);
     }
 
-    @Operation(summary = "가맹점별 입출고 히스토리 조회 API", description = "가맹점의 입출고 히스토리를 조회합니다.")
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<ReceivingOrderHistory>>> getReceivingHistoryByMemberId(@AuthenticationPrincipal SecurityUser securityUser) {
-        log.info("가맹점별 입출고 히스토리 조회 요청 - 가맹점 ID: {}", securityUser.getMemberId());
+    @Operation(summary = "가맹점별 입출고 히스토리 조회 API", description = "토큰 인증된 가맹점의 입출고 히스토리를 조회합니다. (가맹점 전용)")
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<ReceivingHistoryListResponseDTO>> getMyReceivingHistory(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @AuthenticationPrincipal SecurityUser securityUser) {
+        
+        log.info("가맹점별 입출고 히스토리 조회 요청 - 가맹점 ID: {}, Page: {}, Size: {}", 
+                securityUser.getMemberId(), page, size);
 
-        List<ReceivingOrderHistory> history = receivingOrderHistoryService.getReceivingHistoryByMemberId(securityUser.getMemberId());
-        log.info("가맹점별 입출고 히스토리 조회 완료 - 가맹점 ID: {}, 히스토리 수: {}", securityUser.getMemberId(), history.size());
+        ReceivingHistoryListResponseDTO response = receivingOrderHistoryService.getReceivingHistoryByMemberId(
+                securityUser.getMemberId(), page, size);
+        
+        log.info("가맹점별 입출고 히스토리 조회 완료 - 가맹점 ID: {}, 총 데이터 수: {}", 
+                securityUser.getMemberId(), response.getTotalElements());
 
-        return ApiResponse.success(SuccessStatus.GET_RECEIVING_HISTORY_SUCCESS, history);
+        return ApiResponse.success(SuccessStatus.GET_RECEIVING_HISTORY_SUCCESS, response);
     }
 
-    @Operation(summary = "주문별 입고 히스토리 조회 API", description = "특정 주문의 입고 히스토리를 조회합니다.")
-    @GetMapping("/{orderNumber}")
-    public ResponseEntity<ApiResponse<List<ReceivingOrderHistory>>> getReceivingHistoryByOrderNumber(@PathVariable String orderNumber) {
-        log.info("주문별 입고 히스토리 조회 요청 - Order Number: {}", orderNumber);
+    @Operation(summary = "관리자용 전체 입출고 히스토리 조회 API", description = "모든 가맹점의 입출고 히스토리를 조회합니다. (관리자 전용)")
+    @GetMapping("/admin/all")
+    public ResponseEntity<ApiResponse<ReceivingHistoryListResponseDTO>> getAllReceivingHistoryForAdmin(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @AuthenticationPrincipal SecurityUser securityUser) {
+        
+        log.info("관리자용 전체 입출고 히스토리 조회 요청 - 요청자 ID: {}, Role: {}, Page: {}, Size: {}", 
+                securityUser.getMemberId(), securityUser.getRole(), page, size);
 
-        List<ReceivingOrderHistory> history = receivingOrderHistoryService.getReceivingHistoryByOrderNumber(orderNumber);
-        log.info("주문별 입고 히스토리 조회 완료 - Order Number: {}, 히스토리 수: {}", orderNumber, history.size());
+        // 권한 체크 (ADMIN 또는 SUPER_ADMIN만 가능)
+        if (securityUser.getRole() != Role.ADMIN && securityUser.getRole() != Role.SUPER_ADMIN) {
+            log.error("권한 부족 - 요청자 ID: {}, Role: {}", securityUser.getMemberId(), securityUser.getRole());
+            throw new UnauthorizedException("관리자 권한이 필요합니다.");
+        }
 
-        return ApiResponse.success(SuccessStatus.GET_RECEIVING_HISTORY_SUCCESS, history);
+        ReceivingHistoryListResponseDTO response = receivingOrderHistoryService.getAllReceivingHistory(page, size);
+        
+        log.info("관리자용 전체 입출고 히스토리 조회 완료 - 총 데이터 수: {}", response.getTotalElements());
+
+        return ApiResponse.success(SuccessStatus.GET_RECEIVING_HISTORY_SUCCESS, response);
+    }
+
+    @Operation(summary = "관리자용 특정 가맹점 입출고 히스토리 조회 API", description = "특정 가맹점의 입출고 히스토리를 조회합니다. (관리자 전용)")
+    @GetMapping("/admin/member/{memberId}")
+    public ResponseEntity<ApiResponse<ReceivingHistoryListResponseDTO>> getReceivingHistoryByMemberIdForAdmin(
+            @PathVariable Long memberId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @AuthenticationPrincipal SecurityUser securityUser) {
+        
+        log.info("관리자용 특정 가맹점 입출고 히스토리 조회 요청 - 가맹점 ID: {}, 요청자 ID: {}, Role: {}, Page: {}, Size: {}", 
+                memberId, securityUser.getMemberId(), securityUser.getRole(), page, size);
+
+        // 권한 체크 (ADMIN 또는 SUPER_ADMIN만 가능)
+        if (securityUser.getRole() != Role.ADMIN && securityUser.getRole() != Role.SUPER_ADMIN) {
+            log.error("권한 부족 - 요청자 ID: {}, Role: {}", securityUser.getMemberId(), securityUser.getRole());
+            throw new UnauthorizedException("관리자 권한이 필요합니다.");
+        }
+
+        ReceivingHistoryListResponseDTO response = receivingOrderHistoryService.getReceivingHistoryByMemberIdForAdmin(
+                memberId, page, size);
+        
+        log.info("관리자용 특정 가맹점 입출고 히스토리 조회 완료 - 가맹점 ID: {}, 총 데이터 수: {}", 
+                memberId, response.getTotalElements());
+
+        return ApiResponse.success(SuccessStatus.GET_RECEIVING_HISTORY_SUCCESS, response);
+    }
+
+    @Operation(summary = "주문별 입출고 히스토리 조회 API", description = "특정 주문의 입출고 히스토리를 조회합니다.")
+    @GetMapping("/order/{orderNumber}")
+    public ResponseEntity<ApiResponse<ReceivingHistoryListResponseDTO>> getReceivingHistoryByOrderNumber(
+            @PathVariable String orderNumber,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        
+        log.info("주문별 입출고 히스토리 조회 요청 - Order Number: {}, Page: {}, Size: {}", orderNumber, page, size);
+
+        ReceivingHistoryListResponseDTO response = receivingOrderHistoryService.getReceivingHistoryByOrderNumber(
+                orderNumber, page, size);
+        
+        log.info("주문별 입출고 히스토리 조회 완료 - Order Number: {}, 총 데이터 수: {}", 
+                orderNumber, response.getTotalElements());
+
+        return ApiResponse.success(SuccessStatus.GET_RECEIVING_HISTORY_SUCCESS, response);
     }
 }
