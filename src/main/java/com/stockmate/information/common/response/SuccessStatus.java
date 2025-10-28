@@ -14,6 +14,7 @@ public enum SuccessStatus {
      */
     SEND_HEALTH_CHECK_SUCCESS(HttpStatus.OK,"서버 상태 체크 성공"),
     GET_RECEIVING_HISTORY_SUCCESS(HttpStatus.OK,"입고 히스토리 조회 성공"),
+    REGISTER_RECEIVING_HISTORY_SUCCESS(HttpStatus.OK,"입고 히스토리 등록 성공"),
 
     ;
 

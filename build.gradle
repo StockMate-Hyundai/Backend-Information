@@ -26,6 +26,9 @@ dependencyManagement {
 }
 
 dependencies {
+    // 공통 모듈
+    implementation files('../Backend-Common/build/libs/common-0.0.1-SNAPSHOT.jar')
+    
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
@@ -53,9 +56,6 @@ dependencies {
 
     // Config Client
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
-
-    // Kafka
-    implementation 'org.springframework.kafka:spring-kafka'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

@@ -1,5 +1,7 @@
 package com.stockmate.information.api.order.controller;
 
+import com.stockmate.information.api.order.dto.ReceivingHistoryRequestDTO;
+import com.stockmate.information.api.order.dto.ReceivingHistoryResponseDTO;
 import com.stockmate.information.api.order.entity.ReceivingOrderHistory;
 import com.stockmate.information.api.order.service.ReceivingOrderHistoryService;
 import com.stockmate.information.common.config.security.SecurityUser;
@@ -21,6 +23,17 @@ import java.util.List;
 public class ReceivingOrderHistoryController {
 
     private final ReceivingOrderHistoryService receivingOrderHistoryService;
+
+    @Operation(summary = "입고 히스토리 등록 API", description = "입고 히스토리를 등록합니다.")
+    @PostMapping
+    public ResponseEntity<ApiResponse<ReceivingHistoryResponseDTO>> registerReceivingHistory(@RequestBody ReceivingHistoryRequestDTO requestDTO) {
+        log.info("입고 히스토리 등록 요청 - 가맹점 ID: {}, 주문 번호: {}", requestDTO.getMemberId(), requestDTO.getOrderNumber());
+
+        ReceivingHistoryResponseDTO response = receivingOrderHistoryService.registerReceivingHistory(requestDTO);
+        log.info("입고 히스토리 등록 완료 - 가맹점 ID: {}, 주문 번호: {}", requestDTO.getMemberId(), requestDTO.getOrderNumber());
+
+        return ApiResponse.success(SuccessStatus.REGISTER_RECEIVING_HISTORY_SUCCESS, response);
+    }
 
     @Operation(summary = "가맹점별 입고 히스토리 조회 API", description = "가맹점의 입고 히스토리를 조회합니다.")
     @GetMapping
