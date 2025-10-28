@@ -20,7 +20,7 @@ public class ReceivingOrderHistoryService {
 
     @Transactional
     public ReceivingHistoryResponseDTO registerReceivingHistory(ReceivingHistoryRequestDTO requestDTO) {
-        log.info("입고 히스토리 등록 시작 - 가맹점 ID: {}, 주문 번호: {}, 메시지: {}", 
+        log.info("입출고 히스토리 등록 시작 - 가맹점 ID: {}, 주문 번호: {}, 메시지: {}",
                 requestDTO.getMemberId(), requestDTO.getOrderNumber(), requestDTO.getMessage());
 
         ReceivingOrderHistory receivingOrderHistory = ReceivingOrderHistory.builder()
@@ -32,7 +32,7 @@ public class ReceivingOrderHistoryService {
 
         ReceivingOrderHistory saved = receivingOrderHistoryRepository.save(receivingOrderHistory);
         
-        log.info("입고 히스토리 등록 완료 - 가맹점 ID: {}, 주문 번호: {}, 상태: {}", 
+        log.info("입출고 히스토리 등록 완료 - 가맹점 ID: {}, 주문 번호: {}, 상태: {}",
                 requestDTO.getMemberId(), requestDTO.getOrderNumber(), requestDTO.getStatus());
 
         return ReceivingHistoryResponseDTO.builder()
@@ -47,13 +47,13 @@ public class ReceivingOrderHistoryService {
 
     @Transactional(readOnly = true)
     public List<ReceivingOrderHistory> getReceivingHistoryByMemberId(Long memberId) {
-        log.info("가맹점별 입고 히스토리 조회 - 가맹점 ID: {}", memberId);
+        log.info("가맹점별 입출고 히스토리 조회 - 가맹점 ID: {}", memberId);
         return receivingOrderHistoryRepository.findByMemberIdOrderByCreatedAtDesc(memberId);
     }
 
     @Transactional(readOnly = true)
     public List<ReceivingOrderHistory> getReceivingHistoryByOrderNumber(String orderNumber) {
-        log.info("주문별 입고 히스토리 조회 - Order Number: {}", orderNumber);
+        log.info("주문별 입출고 히스토리 조회 - Order Number: {}", orderNumber);
         return receivingOrderHistoryRepository.findByOrderNumberOrderByCreatedAtDesc(orderNumber);
     }
 }
