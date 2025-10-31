@@ -17,7 +17,7 @@ public class PartsApiService {
 
     private final WebClient webClient;
 
-    @Value("${parts.server.url:http://parts-service:8080}")
+    @Value("${parts.server.url}")
     private String partsServerUrl;
 
     /**

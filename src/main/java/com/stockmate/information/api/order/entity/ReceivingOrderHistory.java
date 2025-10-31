@@ -26,6 +26,9 @@ public class ReceivingOrderHistory extends BaseTimeEntity {
     @Column(name = "member_id", nullable = false)
     private Long memberId; // 가맹점 ID
 
+    @Column(name = "order_id")
+    private Long orderId; // 주문 ID (출고의 경우 null)
+
     @Column(name = "order_number")
     private String orderNumber; // 주문 번호 (출고의 경우 null)
 
