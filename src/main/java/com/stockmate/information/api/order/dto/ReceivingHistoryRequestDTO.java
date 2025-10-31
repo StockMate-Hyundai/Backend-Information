@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 public class ReceivingHistoryRequestDTO {
     private Long memberId; // 가맹점 ID
+    private Long orderId; // 주문 ID (출고의 경우 null 가능)
     private String orderNumber; // 주문 번호 (출고의 경우 null 가능)
     private String message; // 메시지
     private String status; // 상태 (예: "RECEIVED", "RELEASED")

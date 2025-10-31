@@ -28,6 +28,7 @@ public class ReceivingOrderHistoryService {
         // 히스토리 엔티티 생성
         ReceivingOrderHistory receivingOrderHistory = ReceivingOrderHistory.builder()
                 .memberId(requestDTO.getMemberId()) // 가맹점 ID
+                .orderId(requestDTO.getOrderId()) // 주문 ID
                 .orderNumber(requestDTO.getOrderNumber()) // 주문 번호
                 .message(requestDTO.getMessage()) // 메시지
                 .status(requestDTO.getStatus()) // 상태
@@ -261,6 +262,7 @@ public class ReceivingOrderHistoryService {
         return ReceivingHistoryDetailDTO.builder()
                 .id(history.getId())
                 .memberId(history.getMemberId())
+                .orderId(history.getOrderId())
                 .orderNumber(history.getOrderNumber())
                 .message(history.getMessage())
                 .status(history.getStatus())
@@ -333,6 +335,7 @@ public class ReceivingOrderHistoryService {
         return ReceivingHistoryDetailDTO.builder()
                 .id(history.getId())
                 .memberId(history.getMemberId())
+                .orderId(history.getOrderId())
                 .orderNumber(history.getOrderNumber())
                 .message(history.getMessage())
                 .status(history.getStatus())

@@ -20,7 +20,7 @@ public class UserApiService {
 
     private final WebClient webClient;
 
-    @Value("${user.server.url:http://user-service:8080}")
+    @Value("${user.server.url}")
     private String userServerUrl;
 
     /**

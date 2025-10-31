@@ -15,6 +15,7 @@ import java.util.List;
 public class ReceivingHistoryDetailDTO {
     private Long id;
     private Long memberId;
+    private Long orderId;
     private String orderNumber;
     private String message;
     private String status;
