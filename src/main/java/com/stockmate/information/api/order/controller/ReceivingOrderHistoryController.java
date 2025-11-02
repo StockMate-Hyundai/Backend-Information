@@ -65,7 +65,7 @@ public class ReceivingOrderHistoryController {
                 securityUser.getMemberId(), securityUser.getRole(), page, size);
 
         // 권한 체크 (ADMIN 또는 SUPER_ADMIN만 가능)
-        if (securityUser.getRole() != Role.ADMIN && securityUser.getRole() != Role.SUPER_ADMIN) {
+        if (securityUser.getRole() != Role.ADMIN && securityUser.getRole() != Role.SUPER_ADMIN && securityUser.getRole() != Role.WAREHOUSE) {
             log.error("권한 부족 - 요청자 ID: {}, Role: {}", securityUser.getMemberId(), securityUser.getRole());
             throw new UnauthorizedException("관리자 권한이 필요합니다.");
         }
@@ -89,7 +89,7 @@ public class ReceivingOrderHistoryController {
                 memberId, securityUser.getMemberId(), securityUser.getRole(), page, size);
 
         // 권한 체크 (ADMIN 또는 SUPER_ADMIN만 가능)
-        if (securityUser.getRole() != Role.ADMIN && securityUser.getRole() != Role.SUPER_ADMIN) {
+        if (securityUser.getRole() != Role.ADMIN && securityUser.getRole() != Role.SUPER_ADMIN && securityUser.getRole() != Role.WAREHOUSE) {
             log.error("권한 부족 - 요청자 ID: {}, Role: {}", securityUser.getMemberId(), securityUser.getRole());
             throw new UnauthorizedException("관리자 권한이 필요합니다.");
         }
